@@ -1,3 +1,3 @@
 # Simulation Artifacts
-delay_line.vcd 
-sim.out
+*.vcd 
+*.out
