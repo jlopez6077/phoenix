@@ -50,7 +50,7 @@ def create_sv_module(module_name: str):
     file_path = Path(f"{module_name}.sv")
     write_file(file_path, full_content)
 
-def create_sv_testbench()
+def create_sv_testbench():
     today = datetime.now().strftime("%Y-%m-%d")
     # TODO :    read .sv module
 #               create testbench w/ sv_tb_template & .sv module parameters

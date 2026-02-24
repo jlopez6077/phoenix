@@ -1,4 +1,4 @@
-`timescale 1ns/1ps
+`timescale 1ns / 1ps
 
 module delay_line_tb;
   parameter LATENCY = 2;
