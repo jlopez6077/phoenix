@@ -1,3 +1,4 @@
 # Simulation Artifacts
 *.vcd 
 *.out
+venv/
