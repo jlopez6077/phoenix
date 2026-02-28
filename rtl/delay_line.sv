@@ -4,6 +4,7 @@ Module      : delay_line
 Project     : Phoenix Basic Library
 Author      : Juan Lopez
 Created     : 2026-02-19
+Module Type : COMMON
 
 Description :
     Pipelined non-blocking delay
@@ -11,8 +12,8 @@ Description :
 ------------------------------------------------------------------------------
 */
 module delay_line #(
-  parameter int LATENCY = 1,
-  parameter int WIDTH = 8
+  parameter int LATENCY = 2,  // 2 is default, 2-Flop Synchronizer 
+  parameter int WIDTH = 1     
 )(
   input   logic clk,
   input   logic rst_n,

@@ -29,6 +29,7 @@ module bypass_tb;
   initial begin
     $dumpfile("bypass.vcd");
     $dumpvars(0,bypass_tb);
+    $display("Period: %d ns\n", PERIOD);
     
     rst_n <= 0;
     sw <= 0;

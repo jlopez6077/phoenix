@@ -42,6 +42,7 @@ def create_sv_module(module_name: str):
         project=PROJECT,
         author=AUTHOR,
         date=today,
+        module_type="TODO: Add module type (MATH, INTERFACE, COMMON, MEMORY"
         description="TODO: Add module description."
     )
     module_body = module_template.format(module_name=module_name)

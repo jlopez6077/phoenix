@@ -34,6 +34,8 @@ module delay_line_tb;
     din = 0;
     repeat(5) @(posedge clk);
     rst_n = 1;
+    $display("--- Reset Release at %t", $time);
+
     @(posedge clk);
 
     repeat (5) begin

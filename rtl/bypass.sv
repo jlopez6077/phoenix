@@ -4,6 +4,7 @@ Module      : bypass
 Project     : Phoenix Basic Library
 Author      : Juan Lopez
 Created     : 2026-02-22
+Module Type : COMMON
 
 Description :
     bypass is a multiplexer that allows dina or dinb to equal dout
