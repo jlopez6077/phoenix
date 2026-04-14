@@ -1,0 +1,9 @@
+python
+python-pip
+pyenv
+ipython
+tk
+iverilog
+gtkwave
+verilator
+

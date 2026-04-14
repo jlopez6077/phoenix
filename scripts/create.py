@@ -42,7 +42,7 @@ def create_sv_module(module_name: str):
         project=PROJECT,
         author=AUTHOR,
         date=today,
-        module_type="TODO: Add module type (MATH, INTERFACE, COMMON, MEMORY"
+        module_type="TODO: Add module type (MATH, INTERFACE, COMMON, MEMORY)",
         description="TODO: Add module description."
     )
     module_body = module_template.format(module_name=module_name)
@@ -54,7 +54,7 @@ def create_sv_module(module_name: str):
 def create_sv_testbench():
     today = datetime.now().strftime("%Y-%m-%d")
     # TODO :    read .sv module
-#               create testbench w/ sv_tb_template & .sv module parameters
+    #           create testbench w/ sv_tb_template & .sv module parameters
     
 # ---------------------------------------------------------------------------
 # Entry Point

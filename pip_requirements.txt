@@ -1,0 +1,8 @@
+scipy
+matplotlib
+pandas
+cocotb
+cocotbext-axi
+cocotbext-eth
+cocotbext-uart
+cocotbext-pcie
