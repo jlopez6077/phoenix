@@ -23,17 +23,19 @@ Open-Source Toolchain:
 * cocotbext-eth
 * cocotbext-uart
 * cocotbext-pcie
-## Repository Structure
-The project follows a modular organization to separate source code, testbenches, and automation scripts. For more information [[docs/workflow.md]]
+## Workflow
+The project follows a modular organization to separate source code, testbenches, and automation scripts. For more information [[workflow/workflow.md]]
+## PhoenixCLI
+A custom command line interface designed to automate repetitive tasks and accelerate development. For more information [[cli/phxCLI.md]].
 ## Setup & Installation
 The library uses a tiered installation process managed by install.sh. In install.sh PACKAGE_MANAGER needs to change depending on the Linux Distribution.
 1. Bash Scripts
   * install.sh - Executes all Bash Scripts
   * functions.sh - Script Functions
-  * docs/work.sh - Installs FPGA Toolchain
+  * workflow/work.sh - Installs FPGA Toolchain
   * cli/config.sh - Installs Python Workflow
 2. Initialization files
-	* pkg.ini - Simulation & Recommended Toolchain
+	* workflow/pkg.ini - Simulation & Recommended Toolchain
 	* cli/python_config.ini - Python Installation Configuration
 ## License
 This project is licensed under the MIT License. For the full legal text, please refer to [[License]]

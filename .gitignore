@@ -1,4 +1,5 @@
 # Simulation Artifacts
 *.vcd 
 *.out
-venv/
+.python-version
+.venv/
