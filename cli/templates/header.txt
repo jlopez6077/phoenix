@@ -1,0 +1,14 @@
+/*
+--------------------------------------------------------------------------------
+Module      : {module_name}
+Project     : {project}
+Author      : {author}
+Created     : {date}
+Module Type : {module_type}
+
+Description :
+  {description}
+
+--------------------------------------------------------------------------------
+*/
+
