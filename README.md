@@ -7,13 +7,13 @@ A vendor-neutral collection of reusable, parameterizable SystemVerilog modules b
 
 ---
 
-## 🎯 Project Goals
+## Project Goals
 The mission of this repository is to **standardize FPGA project structures** and provide a modular hardware foundation. 
 - **Portability**: Code is written to be vendor-neutral, ensuring compatibility across Xilinx, Intel, and open-source toolchains.
 - **Verification-First**: Every module is designed with testability in mind, supporting both Cocotb and standard SystemVerilog testbenches.
 - **Scalability**: Parameterized modules allow for seamless integration into various design requirements.
 
-## 📂 Repository Structure
+## Repository Structure
 ```text
 phoenix/
 ├── docs/               # Documentation and setup scripts
@@ -28,23 +28,21 @@ phoenix/
 └── README.md           # This file
 ```
 
-## 🛠 Hardware Modules
+## Hardware Modules
 The library is organized into logical groups of parameterizable components:
 
-### 🛰 Bus Interfaces
-* **APB Interface**: Standardized SystemVerilog interface for the Advanced Peripheral Bus.
-* **GPIO Controller**: An APB-compatible General Purpose I/O controller with configurable width.
+* Bus Interfaces
+	* **APB Interface**: Standardized SystemVerilog interface for the Advanced Peripheral Bus.
+	* **GPIO Controller**: An APB-compatible General Purpose I/O controller with configurable width.
 
-### 🧩 Common Logic
-* **Bypass**: Simple parameterizable bypass logic for pipeline management.
-* **Debouncer**: Glitch filter for physical switches or noisy asynchronous signals.
-* **Delay Line**: Configurable hardware delay elements for signal alignment.
+* Common Logic
+	* **Bypass**: Simple parameterizable bypass logic for pipeline management.
+	* **Debouncer**: Glitch filter for physical switches or noisy asynchronous signals.
+	* **Delay Line**: Configurable hardware delay elements for signal alignment.
 
-### 🧮 Math & Memory
-* *Modules in `src/math` and `src/memory` are currently under active development.*
 
-## 🧪 Testing & Verification
-We prioritize open-source verification tools to ensure accessibility and speed.
+## Testing & Verification
+I prioritize open-source verification tools to ensure accessibility and speed.
 
 | Tool            | Purpose                                           |
 | :-------------- | :------------------------------------------------ |
@@ -58,7 +56,7 @@ We prioritize open-source verification tools to ensure accessibility and speed.
 
 For more details on the verification methodology, see [**docs/workflow.md**](docs/workflow.md).
 
-## 🚀 Setup & Installation
+## Setup & Installation
 The library uses a tiered installation process to handle system dependencies and Python environments.
 
 ### 1. Prerequisites
@@ -74,5 +72,5 @@ This will automatically trigger:
 - `docs/work.sh`: Installs the FPGA simulation toolchain (Verilator, etc.).
 - `docs/pyinstall.sh`: Configures the Python environment and installs Cocotb dependencies.
 
-## 📄 License
+## License
 This project is licensed under the **MIT License**. For the full legal text, please refer to the [LICEASE](LICEASE) file.
