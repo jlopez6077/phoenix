@@ -12,8 +12,8 @@ Description :
 ------------------------------------------------------------------------------
 */
 module phx_delay_line #(
-  parameter int LATENCY = 2,  // 2 is default, 2-Flop Synchronizer 
-  parameter int WIDTH = 1     
+  parameter LATENCY = 2,  // 2 is default, 2-Flop Synchronizer 
+  parameter WIDTH = 1     
 )(
   input   logic clk,
   input   logic rst_n,

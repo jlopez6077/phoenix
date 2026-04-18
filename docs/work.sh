@@ -6,7 +6,7 @@ FILE_DIR="$(dirname "$(readlink -f "$0")")"                   # Script Directory
 LIB_DIR="$FILE_DIR/lib"                                       # lib/ File Path
 REPO_ROOT=$(readlink -m "$LIB_DIR/$(cat "$LIB_DIR/phoenix")") # Repository File Path
 
-CONFIG_FILE="$FILE_DIR/pkg.ini" # Package List File Path
+CONFIG_FILE="$FILE_DIR/config.ini" # Package List File Path
 
 source "$REPO_ROOT/functions.sh"
 
@@ -17,8 +17,8 @@ log_script_start
 
 echo "--- 1. Extracting data from $CONFIG_FILE ---"
 echo
-SIM_PKG=$(get_ini_value "$CONFIG_FILE" "Packages" "Simulation")
-RECOMMONDED=$(get_ini_value "$CONFIG_FILE" "Packages" "Recommonded")
+SIM_PKG=$(get_ini_value "$CONFIG_FILE" "Packages" "simulation")
+RECOMMONDED=$(get_ini_value "$CONFIG_FILE" "Packages" "recommonded")
 
 string_to_array "$SIM_PKG" "sim_pkg"
 string_to_array "$RECOMMONDED" "recommonded_pkg"

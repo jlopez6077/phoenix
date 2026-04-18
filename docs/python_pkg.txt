@@ -1,0 +1,13 @@
+# Additional Python Packages installed in .cocotb_venv
+# Not required, but recommended
+# --- Core Data Science & Numerical Computing ---
+numpy
+pandas
+scipy
+
+# --- Data Visualization ---
+matplotlib
+
+# --- Developer Productivity ---
+ipython
+

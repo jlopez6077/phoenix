@@ -3,3 +3,6 @@
 *.out
 .python-version
 .venv/
+sim_build/
+__pycache__/ 
+results.xml

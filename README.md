@@ -1,41 +1,78 @@
-# Phoenix Basic Library
-Phoenix Basic Library is a vendor-neutral collection of reusable, parameterizable SystemVerilog modules built from first principles. This project serves as a foundational library for larger FPGA designs, a documented hardware workflow, and a sandbox for developing the PhoenixCLI automation toolchain.
-## Overview
-The goal of this repository is to standardize FPGA project structures to make development seamless across different projects. It integrates hardware design with a Python-based automation layer to handle environment setup and project templating.
-## Hardware
-The library currently includes the following parameterizable SystemVerilog modules:
+# 🦅 Phoenix Basic Library
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Language: SystemVerilog](https://img.shields.io/badge/Language-SystemVerilog-orange.svg)
+![Status: Active](https://img.shields.io/badge/Status-Active-brightgreen.svg)
 
-APB (Advanced Peripheral Bus)
-* SystemVerilog Interface: Standardized APB bus definition.
-* General Purpose I/O (GPIO): APB-compatible GPIO controller.
-Common
-* Bypass: Parameterizable bypass logic.
-* Debouncer: Input signal debouncing for physical switches or noisy signals.
-* Delay Line: Configurable hardware delay elements.
+A vendor-neutral collection of reusable, parameterizable SystemVerilog modules built from first principles. Phoenix serves as a foundational library for high-performance FPGA designs and provides a documented, modern hardware workflow.
 
-## Testing
-Testbenches are either using the Cocotb Framework or SystemVerilog. Simulation software is either Vivado's xsim or an open-source toolchain. More information in [[docs/workflow]]
-Open-Source Toolchain:
-* verilator
-* gtkwave
-* cocotb
-* cocotbext-axi
-* cocotbext-eth
-* cocotbext-uart
-* cocotbext-pcie
-## Workflow
-The project follows a modular organization to separate source code, testbenches, and automation scripts. For more information [[workflow/workflow.md]]
-## PhoenixCLI
-A custom command line interface designed to automate repetitive tasks and accelerate development. For more information [[cli/phxCLI.md]].
-## Setup & Installation
-The library uses a tiered installation process managed by install.sh. In install.sh PACKAGE_MANAGER needs to change depending on the Linux Distribution.
-1. Bash Scripts
-  * install.sh - Executes all Bash Scripts
-  * functions.sh - Script Functions
-  * workflow/work.sh - Installs FPGA Toolchain
-  * cli/config.sh - Installs Python Workflow
-2. Initialization files
-	* workflow/pkg.ini - Simulation & Recommended Toolchain
-	* cli/python_config.ini - Python Installation Configuration
-## License
-This project is licensed under the MIT License. For the full legal text, please refer to [[License]]
+---
+
+## 🎯 Project Goals
+The mission of this repository is to **standardize FPGA project structures** and provide a modular hardware foundation. 
+- **Portability**: Code is written to be vendor-neutral, ensuring compatibility across Xilinx, Intel, and open-source toolchains.
+- **Verification-First**: Every module is designed with testability in mind, supporting both Cocotb and standard SystemVerilog testbenches.
+- **Scalability**: Parameterized modules allow for seamless integration into various design requirements.
+
+## 📂 Repository Structure
+```text
+phoenix/
+├── docs/               # Documentation and setup scripts
+├── lib/                # Library dependencies
+├── src/                # Source code
+│   ├── apb/            # Advanced Peripheral Bus components
+│   ├── common/         # Utility and common logic modules
+│   ├── math/           # Parameterizable math operators
+│   └── memory/         # RAM/FIFO and memory controllers
+├── functions.sh        # Shell utility functions
+├── install.sh          # Main installation entry point
+└── README.md           # This file
+```
+
+## 🛠 Hardware Modules
+The library is organized into logical groups of parameterizable components:
+
+### 🛰 Bus Interfaces
+* **APB Interface**: Standardized SystemVerilog interface for the Advanced Peripheral Bus.
+* **GPIO Controller**: An APB-compatible General Purpose I/O controller with configurable width.
+
+### 🧩 Common Logic
+* **Bypass**: Simple parameterizable bypass logic for pipeline management.
+* **Debouncer**: Glitch filter for physical switches or noisy asynchronous signals.
+* **Delay Line**: Configurable hardware delay elements for signal alignment.
+
+### 🧮 Math & Memory
+* *Modules in `src/math` and `src/memory` are currently under active development.*
+
+## 🧪 Testing & Verification
+We prioritize open-source verification tools to ensure accessibility and speed.
+
+| Tool            | Purpose                                           |
+| :-------------- | :------------------------------------------------ |
+| **Verilator**   | Primary high-performance simulator (SV to C++)    |
+| **Cocotb**      | Python-based verification framework               |
+| **GTKWave**     | Waveform visualization                            |
+| **Vivado XSim** | Vendor-specific timing and primitive verification |
+
+### Key Cocotb Extensions Used:
+- `cocotbext-axi`, `cocotbext-eth`, `cocotbext-uart`, `cocotbext-pcie`
+
+For more details on the verification methodology, see [**docs/workflow.md**](docs/workflow.md).
+
+## 🚀 Setup & Installation
+The library uses a tiered installation process to handle system dependencies and Python environments.
+
+### 1. Prerequisites
+Ensure your `PACKAGE_MANAGER` is correctly set in `install.sh` (e.g., `pacman`, `apt`, `dnf`).
+
+### 2. Installation
+Run the main install script from the repository root:
+```bash
+./install.sh
+```
+
+This will automatically trigger:
+- `docs/work.sh`: Installs the FPGA simulation toolchain (Verilator, etc.).
+- `docs/pyinstall.sh`: Configures the Python environment and installs Cocotb dependencies.
+
+## 📄 License
+This project is licensed under the **MIT License**. For the full legal text, please refer to the [LICEASE](LICEASE) file.
