@@ -59,7 +59,7 @@ module phx_bypass #(
   logic [WIDTH-1:0] mux_out;
   assign mux_out = (sw) ? w_dinb : w_dina;
 
-  if (REGISTER_OUTPUT) begin : gen_reg_out
+  if (REGISTER_OUTPUT != 0) begin : gen_reg_out
     always_ff @(posedge clk) begin 
       if (!rst_n) dout <= '0;
       else        dout <= mux_out;

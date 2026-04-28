@@ -19,10 +19,11 @@ phoenix/
 ├── docs/               # Documentation and setup scripts
 ├── lib/                # Library dependencies
 ├── src/                # Source code
-│   ├── apb/            # Advanced Peripheral Bus components
-│   ├── common/         # Utility and common logic modules
+│   ├── apb/            # Bus infrastructure (Bridges, Fabrics, Interfaces)
+│   ├── common/         # Bus-less primitives (Delays, CDC, Logic)
 │   ├── math/           # Parameterizable math operators
-│   └── memory/         # RAM/FIFO and memory controllers
+│   ├── memory/         # RAM/FIFO and memory controllers
+│   └── peripherals/    # Bus-attached peripherals (GPIO, UART, PWM)
 ├── functions.sh        # Shell utility functions
 ├── install.sh          # Main installation entry point
 └── README.md           # This file
@@ -31,14 +32,16 @@ phoenix/
 ## Hardware Modules
 The library is organized into logical groups of parameterizable components:
 
-* Bus Interfaces
+* **Bus Infrastructure** (`src/apb/`)
 	* **APB Interface**: Standardized SystemVerilog interface for the Advanced Peripheral Bus.
-	* **GPIO Controller**: An APB-compatible General Purpose I/O controller with configurable width.
 
-* Common Logic
-	* **Bypass**: Simple parameterizable bypass logic for pipeline management.
-	* **Debouncer**: Glitch filter for physical switches or noisy asynchronous signals.
-	* **Delay Line**: Configurable hardware delay elements for signal alignment.
+* **Peripherals** (`src/peripherals/`)
+	* **phx_apb_gpio**: An APB-compatible General Purpose I/O controller with configurable width.
+
+* **Common Logic** (`src/common/`)
+	* **phx_bypass**: Simple parameterizable bypass logic for pipeline management.
+	* **phx_debouncer**: Glitch filter for physical switches or noisy asynchronous signals.
+	* **phx_delay_line**: Configurable hardware delay elements for signal alignment.
 
 
 ## Testing & Verification
@@ -73,4 +76,5 @@ This will automatically trigger:
 - `docs/pyinstall.sh`: Configures the Python environment and installs Cocotb dependencies.
 
 ## License
-This project is licensed under the **MIT License**. For the full legal text, please refer to the [LICEASE](LICEASE) file.
+This project is licensed under the **MIT License**. For the full legal text, please refer to the [LICENSE](LICENSE) file.
+---

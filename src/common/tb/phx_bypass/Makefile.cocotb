@@ -3,26 +3,38 @@
 # ------------------------------------------------------------------------------
 # 1. Project Configuration
 # ------------------------------------------------------------------------------
-DUT					?=	phx_delay_line
+DUT					?=	phx_bypass
 RTL_DIR			?= ../../rtl
 LIB_DIR 		?= ../../lib
 PHX_SRC_DIR ?= $(LIB_DIR)/phoenix/src
 
 SIM ?= verilator
+WAVES ?= 1
 TOPLEVEL_LANG ?= verilog
 
 # Cocotb Configuration
 TOPLEVEL = $(DUT)
 MODULE = test_$(DUT)
 
-# Verilator specific flags
-ifeq ($(SIM), verilator)
-    # Enable VCD tracing
-    EXTRA_ARGS += --trace --trace-structs
+# ------------------------------------------------------------------------------
+# 2. Module Paramaters
+# ------------------------------------------------------------------------------
+export PARAM_WIDTH           := 8
+export PARAM_DINA_DELAY      := 3
+export PARAM_DINB_DELAY      := 2
+export PARAM_REGISTER_OUTPUT := 0
+
+ifeq ($(SIM), icarus)
+    COMPILE_ARGS += $(foreach v,$(filter PARAM_%,$(.VARIABLES)),-P $(TOPLEVEL).$(subst PARAM_,,$(v))=$($(v)))
+else ifeq ($(SIM), verilator)
+    COMPILE_ARGS += $(foreach v,$(filter PARAM_%,$(.VARIABLES)),-G$(subst PARAM_,,$(v))=$($(v)))
+		ifeq ($(WAVES), 1)
+			EXTRA_ARGS += --trace --trace-structs
+		endif
 endif
 
 # ------------------------------------------------------------------------------
-# 2. Auto-Discovery Functions
+# 3. RTL Source
 # ------------------------------------------------------------------------------
 # Function: process_f_files
 # Logic: Look at a list of strings. If a string ends in .f, go inside it. 
@@ -33,9 +45,6 @@ process_f_files = $(foreach f,$1,$(if $(filter %.f,$f),$(call process_f_file,$f)
 # and then call process_f_files again to see if there are more nested .f files.
 process_f_file = $(call process_f_files,$(addprefix $(dir $1),$(shell cat $1)))
 
-# ------------------------------------------------------------------------------
-# 3. RTL Source Discovery
-# ------------------------------------------------------------------------------
 # if .f exists, use it: otherwise, fallback to the .sv file
 ifneq ($(wildcard $(RTL_DIR)/$(DUT).f),)
 	VERILOG_SOURCES += $(call process_f_files, $(RTL_DIR)/$(DUT).f)
@@ -47,12 +56,3 @@ endif
 # 4. Cocotb's Make Rules  
 # ------------------------------------------------------------------------------
 include $(shell cocotb-config --makefiles)/Makefile.sim
-
-# ------------------------------------------------------------------------------
-# 5. Execution Rules
-# ------------------------------------------------------------------------------
-waves: 
-	@if [ ! -f dump.vcd ]; then make; fi
-	gtkwave dump.vcd
-
-.PHONY: waves help clean
