@@ -21,7 +21,7 @@ async def test_delay_line_basic(dut):
 
     # 3. Drive stimulus
     latency = int(dut.LATENCY.value)
-    for _ in range(10):
+    for _ in range(20):
         val = random.randint(0, (2**int(dut.WIDTH.value)) - 1)
         dut.din.value = val
         
