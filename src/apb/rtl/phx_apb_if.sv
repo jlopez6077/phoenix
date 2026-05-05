@@ -1,7 +1,7 @@
 
 interface phx_apb_if #(
   parameter DATA_W = 32,
-  parameter ADDR_W = 16
+  parameter ADDR_W = 32
 )();
 
   logic [ADDR_W-1:0]  paddr;
