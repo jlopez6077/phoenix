@@ -93,6 +93,15 @@ interface phx_axil_if #(
         output bvalid,
         input  bready
     );
+    // IO wr_slv block
+    //logic s_axil_awready = 1'b0;
+    //logic s_axil_wready = 1'b0:
+    //logic [1:0] s_axil_bresp = '0;
+    //logic s_axil_bvalid = 1'b0;
+    //assign s_axil_wr.awready  = s_axil_awready;
+    //assign s_axil_wr.wready   = s_axil_wready;
+    //assign s_axil_wr.bresp    = s_axil_bresp;
+    //assign s_axil_wr.bvalid   = s_axil_bvalid;
 
     modport rd_slv (
         // AR
@@ -106,6 +115,15 @@ interface phx_axil_if #(
         output rvalid,
         input  rready
     );
+    // IO rd_slv block
+    //logic s_axil_arready = 1'b0; 
+    //logic [1:0] s_axil_rresp = '0;
+    //logic [AXIL_DATA_W-1:0] s_axil_rdata = '0;
+    //logic s_axil_rvalid     = 1'b0;
+    //assign s_axil_rd.arready  = s_axil_arready;
+    //assign s_axil_rd.rresp    = s_axil_rresp;
+    //assign s_axil_rd.rdata    = s_axil_rdata;
+    //assign s_axil_rd.rvalid   = s_axil_rvalid;
 
     modport wr_mon (
         // AW

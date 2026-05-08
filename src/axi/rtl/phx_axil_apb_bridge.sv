@@ -8,13 +8,6 @@ Module Type : Axi
 
 Description :
     Axi-lite to APB bridge used to translate between protocals.
-
-    Parameters -
-      REGISTER_OUTPUT: Registers the multiplexer is require with
-        * High fanout (WIDTH)
-        * Long routing 
-        * High utilization
-
 ------------------------------------------------------------------------------
 */
 
@@ -145,7 +138,10 @@ module phx_axil_apb_bridge
           m_apb_pwrite <= 1'b0;
         end
       end
-      ACCESS: begin
+      ACCESS_WRITE: begin
+        m_apb_penable <= 1'b1;
+      end
+      ACCESS_READ: begin
         m_apb_penable <= 1'b1;
       end
      endcase
@@ -175,6 +171,12 @@ module phx_axil_apb_bridge
             s_axil_arready <= 1'b1;
           end
         end // SETUP
+        ACCESS_WRITE: begin
+          
+        end
+        ACCESS_READ: begin
+          
+        end
         ACCESS: begin
           if (m_apb.pready) begin   // if APB slave is ready
             if (m_apb_pwrite) begin // if APB is write

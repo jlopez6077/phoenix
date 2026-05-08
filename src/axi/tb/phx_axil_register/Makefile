@@ -1,0 +1,55 @@
+# Project Phoenix - Standardized Simulation Engine
+
+# ------------------------------------------------------------------------------
+# 1. Project Configuration
+# ------------------------------------------------------------------------------
+DUT					?=	phx_axil_register
+RTL_DIR			?= ../../rtl
+LIB_DIR 		?= ../../lib
+PHX_SRC_DIR ?= $(LIB_DIR)/phoenix/src
+
+SIM ?= verilator
+WAVES ?= 1
+TOPLEVEL_LANG ?= verilog
+
+# Cocotb Configuration
+TOPLEVEL = $(DUT)
+MODULE = test_$(DUT)
+
+# ------------------------------------------------------------------------------
+# 2. Module Paramaters
+# ------------------------------------------------------------------------------
+# export PARAM_WIDTH           := 8
+
+ifeq ($(SIM), icarus)
+    COMPILE_ARGS += $(foreach v,$(filter PARAM_%,$(.VARIABLES)),-P $(TOPLEVEL).$(subst PARAM_,,$(v))=$($(v)))
+else ifeq ($(SIM), verilator)
+    COMPILE_ARGS += $(foreach v,$(filter PARAM_%,$(.VARIABLES)),-G$(subst PARAM_,,$(v))=$($(v)))
+		ifeq ($(WAVES), 1)
+			EXTRA_ARGS += --trace --trace-structs
+		endif
+endif
+
+# ------------------------------------------------------------------------------
+# 3. RTL Source
+# ------------------------------------------------------------------------------
+# Function: process_f_files
+# Logic: Look at a list of strings. If a string ends in .f, go inside it. 
+# Otherwise, keep the filename as is.
+process_f_files = $(foreach f,$1,$(if $(filter %.f,$f),$(call process_f_file,$f),$f))
+# Function: process_f_file
+# Logic: Read the .f file, add its directory as a prefix to everything inside,
+# and then call process_f_files again to see if there are more nested .f files.
+process_f_file = $(call process_f_files,$(addprefix $(dir $1),$(shell cat $1)))
+
+# if .f exists, use it: otherwise, fallback to the .sv file
+ifneq ($(wildcard $(RTL_DIR)/$(DUT).f),)
+	VERILOG_SOURCES += $(call process_f_files, $(RTL_DIR)/$(DUT).f)
+else 
+	VERILOG_SOURCES += $(RTL_DIR)/$(DUT).sv
+endif
+
+# ------------------------------------------------------------------------------
+# 4. Cocotb's Make Rules  
+# ------------------------------------------------------------------------------
+include $(shell cocotb-config --makefiles)/Makefile.sim
