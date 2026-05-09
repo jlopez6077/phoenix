@@ -13,7 +13,7 @@ WAVES ?= 1
 TOPLEVEL_LANG ?= verilog
 
 # Cocotb Configuration
-TOPLEVEL = $(DUT)
+TOPLEVEL = $(DUT)_top
 MODULE = test_$(DUT)
 
 # ------------------------------------------------------------------------------
@@ -48,6 +48,8 @@ ifneq ($(wildcard $(RTL_DIR)/$(DUT).f),)
 else 
 	VERILOG_SOURCES += $(RTL_DIR)/$(DUT).sv
 endif
+
+VERILOG_SOURCES += $(PWD)/phx_axil_register_top.sv
 
 # ------------------------------------------------------------------------------
 # 4. Cocotb's Make Rules  

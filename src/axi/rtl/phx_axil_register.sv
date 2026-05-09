@@ -12,8 +12,8 @@ Description :
 */
 
 module phx_axil_register (
-  logic input clk,
-  logic input rst_n,
+  input logic clk,
+  input logic rst_n,
 
   phx_axil_if.wr_slv s_axil_wr,
   phx_axil_if.rd_slv s_axil_rd
@@ -25,7 +25,7 @@ module phx_axil_register (
 
   // IO wr_slv block
   logic s_axil_awready = 1'b0;
-  logic s_axil_wready = 1'b0:
+  logic s_axil_wready = 1'b0;
   logic [1:0] s_axil_bresp = '0;
   logic s_axil_bvalid = 1'b0;
   assign s_axil_wr.awready  = s_axil_awready;
@@ -44,9 +44,9 @@ module phx_axil_register (
   assign s_axil_rd.rvalid   = s_axil_rvalid;
 
   // Registers
-  localparam NUM_REG = 4;
-  localparam R_MSB = $clog2(NUM_REG);
-  localparam R_LSB = 1;
+  localparam MAX_ADDR = 12;
+  localparam R_MSB = $clog2(MAX_ADDR)-1;
+  localparam R_LSB = 2;
   logic [AXIL_DATA_W-1:0] register_0;
   logic [AXIL_DATA_W-1:0] register_1;
   logic [AXIL_DATA_W-1:0] register_2;
@@ -63,7 +63,7 @@ module phx_axil_register (
   logic [AXIL_ADDR_W-1:0] araddr = '0;
 
   // AW Logic ---------------------------------------------------------
-  always_ff @(posedge clk) begin : awready
+  always_ff @(posedge clk) begin : awready_block
     if (!rst_n) begin
       s_axil_awready <= 1'b0;
       aw_enable <= 1'b1;
@@ -77,7 +77,7 @@ module phx_axil_register (
     end
   end
 
-  always_ff @(posedge clk) begin : awaddr
+  always_ff @(posedge clk) begin : awaddr_block
     if(!rst_n)
       awaddr <= '0;
     else if (s_axil_wr.awvalid && !s_axil_awready && aw_enable)
@@ -85,12 +85,12 @@ module phx_axil_register (
   end
 
   // W Logic ----------------------------------------------------------
-  always_ff @(posedge clk) begin : wready
+  always_ff @(posedge clk) begin : wready_block
     if (!rst_n) begin
       s_axil_wready <= 1'b0;
       w_enable <= 1'b1;
     end else begin
-      if(s_axil_wr.wvalid && s_axil_wready && w_enable) begin
+      if(s_axil_wr.wvalid && !s_axil_wready && w_enable) begin
         s_axil_wready <= 1'b1;
         w_enable <= 1'b0;
       end else begin
@@ -99,7 +99,7 @@ module phx_axil_register (
     end
   end
 
-  always_ff @(posedge clk) begin : wdata
+  always_ff @(posedge clk) begin : wdata_block
     if(!rst_n)
       wdata <= '0;
     else if (s_axil_wr.wvalid && !s_axil_wready && w_enable)
@@ -107,15 +107,13 @@ module phx_axil_register (
   end
 
   // B Logic ----------------------------------------------------------
-  always_ff @(posedge clk) begin : bvalid
+  always_ff @(posedge clk) begin : bvalid_block
     if (!rst_n)begin
       s_axil_bvalid <= 1'b0;
     end else begin
-      // if both AW & W have completed tranfser -> rvalid high 
+      // if both AW & W have completed tranfser -> bvalid high 
       if (!(aw_enable || w_enable)) begin 
-        s_axil_bvalid <= 1'b1;
-      end else if (s_axil_bvalid) begin
-        if (s_axil_wr.bready) begin   // b completed
+        if (s_axil_bvalid && s_axil_wr.bready) begin
           s_axil_bvalid <= 1'b0;
           w_enable <= 1'b1;
           aw_enable <= 1'b1;
@@ -136,31 +134,31 @@ module phx_axil_register (
       register_1 <= '0;
       register_2 <= '0;
       register_3 <= '0;
-    end else if (aw_enable && w_enable) begin
+    end else if (!(aw_enable || w_enable)) begin
       case (awaddr[R_MSB:R_LSB])
-        2'b00  : register_0 <= wdata;
-        2'b01  : register_1 <= wdata;
-        2'b10  : register_2 <= wdata;
-        2'b11  : register_3 <= wdata;
+        2'b00 : register_0 <= wdata;  // 0x0000
+        2'b01 : register_1 <= wdata;  // 0x0100
+        2'b10  : register_2 <= wdata; // 0x1000
+        2'b11  : register_3 <= wdata; // 0x1100
       endcase
     end
   end
 
   // AR Logic ---------------------------------------------------------
-  always_ff @(posedge clk) begin : arready
+  always_ff @(posedge clk) begin : arready_block
     if(!rst_n) begin
       s_axil_arready <= 1'b0;
-      r_enable <= 1'b1;
+      ar_enable <= 1'b1;
     end else begin
       if (s_axil_rd.arvalid && !s_axil_arready && ar_enable) begin
         s_axil_arready <= 1'b1;
-        r_enable <= 1'b0;
+        ar_enable <= 1'b0;
       end else 
         s_axil_arready <= 1'b0;
     end
   end
 
-  always_ff @(posedge clk) begin : araddr
+  always_ff @(posedge clk) begin : araddr_block
    if(!rst_n)
      araddr <= '0;
    else if (s_axil_rd.arvalid && !s_axil_arready && ar_enable)
@@ -168,16 +166,14 @@ module phx_axil_register (
   end
 
   // R Logic ----------------------------------------------------------
-  always_ff @(posedge clk) begin : rvalid
+  always_ff @(posedge clk) begin : rvalid_block
     if (!rst_n) begin
       s_axil_rvalid <= 1'b0;  
     end else begin
-      if (!r_enable) begin
-        s_axil_rvalid <= 1'b1;  
-      end else if (s_axil_rvalid) begin
-        if (s_axil_rd.rready) begin
+      if (!ar_enable) begin
+        if (s_axil_rvalid && s_axil_rd.rready) begin
           s_axil_rvalid <= 1'b0;  
-          r_enable <= 1'b1;
+          ar_enable <= 1'b1;
         end else begin
           s_axil_rvalid <= 1'b1;  
         end
@@ -187,11 +183,11 @@ module phx_axil_register (
     end
   end
 
-  always_ff @(posedge clk) begin : rdata
+  always_ff @(posedge clk) begin : rdata_block
     if (!rst_n) begin
       s_axil_rdata <= '0;
     end else begin
-      if (!r_enable) begin
+      if (!ar_enable) begin
         case(araddr[R_MSB:R_LSB]) 
           2'b00 : s_axil_rdata <= register_0;
           2'b01 : s_axil_rdata <= register_1;
