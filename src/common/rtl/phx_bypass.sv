@@ -14,6 +14,8 @@ Description :
         * High fanout (WIDTH)
         * Long routing 
         * High utilization
+      TWO_FF_SYNC: Adds a two flip-flop synchonizer to sw
+        * If sw is a CDC input
 
 ------------------------------------------------------------------------------
 */
@@ -23,7 +25,8 @@ module phx_bypass #(
   parameter int WIDTH = 8,
   parameter int DINA_DELAY = 0,   // Data input a delay
   parameter int DINB_DELAY = 0,   // Data input b delay
-  parameter int REGISTER_OUTPUT = 0  // low = false
+  parameter int REGISTER_OUTPUT = 0,  // low = false
+  parameter int TWO_FF_SYNC = 0   // low = false
 )(
   input   logic clk,
   input   logic rst_n,
@@ -57,8 +60,25 @@ module phx_bypass #(
   );
 
   logic [WIDTH-1:0] mux_out;
-  assign mux_out = (sw) ? w_dinb : w_dina;
-
+  logic sw_wire;
+  assign mux_out = (sw_wire) ? w_dinb : w_dina;
+  
+  generate
+    if (TWO_FF_SYNC != 0) begin : cdc_sw
+      phx_delay_line #(
+        .LATENCY(2),
+        .WIDTH(1)
+      ) sw_delay_inst (
+        .clk(clk),
+        .rst_n(rst_n),
+        .din(sw),
+        .dout(sw_wire)
+      );
+    end else begin
+      assign sw_wire = sw;
+    end
+  endgenerate
+  
   if (REGISTER_OUTPUT != 0) begin : gen_reg_out
     always_ff @(posedge clk) begin 
       if (!rst_n) dout <= '0;

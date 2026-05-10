@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------
 # 1. Project Configuration
 # ------------------------------------------------------------------------------
-DUT					?=	phx_bypass
+DUT					?=	phx_axil_gpio
 RTL_DIR			?= ../../rtl
 LIB_DIR 		?= ../../lib
 PHX_SRC_DIR ?= $(LIB_DIR)/phoenix/src
@@ -13,17 +13,13 @@ WAVES ?= 1
 TOPLEVEL_LANG ?= verilog
 
 # Cocotb Configuration
-TOPLEVEL = $(DUT)
+TOPLEVEL = $(DUT)_top
 MODULE = test_$(DUT)
 
 # ------------------------------------------------------------------------------
 # 2. Module Paramaters
 # ------------------------------------------------------------------------------
-export PARAM_WIDTH           := 8
-export PARAM_DINA_DELAY      := 3
-export PARAM_DINB_DELAY      := 2
-export PARAM_REGISTER_OUTPUT := 0
-export PARAM_TWO_FF_SYNC     := 1
+# export PARAM_WIDTH           := 8
 
 ifeq ($(SIM), icarus)
     COMPILE_ARGS += $(foreach v,$(filter PARAM_%,$(.VARIABLES)),-P $(TOPLEVEL).$(subst PARAM_,,$(v))=$($(v)))
@@ -52,6 +48,8 @@ ifneq ($(wildcard $(RTL_DIR)/$(DUT).f),)
 else 
 	VERILOG_SOURCES += $(RTL_DIR)/$(DUT).sv
 endif
+
+VERILOG_SOURCES += $(PWD)/$(DUT)_top.sv
 
 # ------------------------------------------------------------------------------
 # 4. Cocotb's Make Rules  

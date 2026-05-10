@@ -52,8 +52,8 @@ async def axil_read(dut, address):
 
 # --- MAIN TEST ---
 @cocotb.test()
-async def test_phx_axil_register_basic(dut):
-    """Test Register Read/Write AXI4-Lite Commands on phx_axil_register_top"""
+async def test_phx_axil_gpio_basic(dut):
+    """Test Register Read/Write AXI4-Lite Commands on phx_axil_gpio_top"""
     
     # Start clock
     clock = Clock(dut.clk, 10, unit="ns")
@@ -67,21 +67,19 @@ async def test_phx_axil_register_basic(dut):
     
     # Define test parameters
     test_addr = 0x0  # Corresponds to register_2 based on R_LSB=1 alignment
-    test_val = 0xDEADBEEF
+    test_val = 0xFFFFFFFF
     
     # Execute Write
     dut._log.info(f"Writing {hex(test_val)} to Address {hex(test_addr)}")
     await axil_write(dut, test_addr, test_val)
-    await axil_write(dut, 0x4, 0xBEEFDEAD)
-    await axil_write(dut, 0x8, 0xA1A1A1A1)
-    await axil_write(dut, 0xc, 0xABCD1234)
+    await axil_write(dut, 0x4, 0xFFFFFFFF)
     
     # Execute Read
     #dut._log.info(f"Reading back from Address {hex(test_addr)}")
-    read_val = await axil_read(dut, test_addr)
-    read_val = await axil_read(dut, 0x4)
-    read_val = await axil_read(dut, 0x8)
-    read_val = await axil_read(dut, 0xc)
+    #read_val = await axil_read(dut, test_addr)
+    #read_val = await axil_read(dut, 0x4)
+    #read_val = await axil_read(dut, 0x8)
+    #read_val = await axil_read(dut, 0xc)
 
     # Verification
     #assert read_val == test_val, f"Error: Read {hex(read_val)}, expected {hex(test_val)}"
