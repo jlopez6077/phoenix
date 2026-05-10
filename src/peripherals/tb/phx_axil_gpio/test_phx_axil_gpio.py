@@ -69,10 +69,10 @@ async def test_phx_axil_gpio_basic(dut):
     test_addr = 0x0  # Corresponds to register_2 based on R_LSB=1 alignment
     test_val = 0xFFFFFFFF
     
-    # Execute Write
+    # Execute Write make 
     dut._log.info(f"Writing {hex(test_val)} to Address {hex(test_addr)}")
-    await axil_write(dut, test_addr, test_val)
-    await axil_write(dut, 0x4, 0xFFFFFFFF)
+    await axil_write(dut, 0x0, 0xFFFFFFFF) # data out
+    await axil_write(dut, 0x4, 0xFFFFFFFF) # data direction
     
     # Execute Read
     #dut._log.info(f"Reading back from Address {hex(test_addr)}")
