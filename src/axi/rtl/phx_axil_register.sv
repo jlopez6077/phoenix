@@ -8,6 +8,11 @@ Module Type : Axi
 
 Description :
     Axi-lite controlled regitsters
+Register Map :
+    0x0 - register_0      : R/W.
+    0x4 - register_1      : R/W.
+    0x8 - register_2      : R/W.
+    0xc - register_3      : R/W.
 ------------------------------------------------------------------------------
 */
 
@@ -44,7 +49,9 @@ module phx_axil_register (
   assign s_axil_rd.rvalid   = s_axil_rvalid;
 
   // Registers
-  localparam MAX_ADDR = 12;
+  // TODO: Change NUM_REG and register names as needed
+  localparam NUM_REG = 4;
+  localparam MAX_ADDR = (NUM_REG > 1) ? (NUM_REG * 4) : 8;
   localparam R_MSB = $clog2(MAX_ADDR)-1;
   localparam R_LSB = 2;
   logic [AXIL_DATA_W-1:0] register_0;
@@ -107,6 +114,7 @@ module phx_axil_register (
   end
 
   // B Logic ----------------------------------------------------------
+  // TODO: Change bvalid if required
   always_ff @(posedge clk) begin : bvalid_block
     if (!rst_n)begin
       s_axil_bvalid <= 1'b0;
@@ -125,9 +133,10 @@ module phx_axil_register (
       end
     end
   end
-  // Implement bresp logic here
+  // TODO: Implement bresp logic here
 
   // Register Write Logic ---------------------------------------------
+  // TODO: Change default register values, addresses, and names
   always_ff @(posedge clk) begin
     if (!rst_n) begin
       register_0 <= '0;
@@ -167,6 +176,7 @@ module phx_axil_register (
   end
 
   // R Logic ----------------------------------------------------------
+  // TODO: Change rvalid is required
   always_ff @(posedge clk) begin : rvalid_block
     if (!rst_n) begin
       s_axil_rvalid <= 1'b0;  
@@ -183,7 +193,8 @@ module phx_axil_register (
       end
     end
   end
-
+  
+  // TODO: Change default register addresses and names
   always_ff @(posedge clk) begin : rdata_block
     if (!rst_n) begin
       s_axil_rdata <= '0;
@@ -201,5 +212,6 @@ module phx_axil_register (
   end
 
   // Your Logic -------------------------------------------------------
+  // TODO: add custom logic here
   
 endmodule
