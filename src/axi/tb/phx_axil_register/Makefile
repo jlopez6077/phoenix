@@ -49,7 +49,9 @@ else
 	VERILOG_SOURCES += $(RTL_DIR)/$(DUT).sv
 endif
 
-VERILOG_SOURCES += $(PWD)/phx_axil_register_top.sv
+ifneq ($(wildcard $(PWD)/$(TOPLEVEL).sv),)
+	VERILOG_SOURCES += $(PWD)/$(TOPLEVEL).sv
+endif
 
 # ------------------------------------------------------------------------------
 # 4. Cocotb's Make Rules  

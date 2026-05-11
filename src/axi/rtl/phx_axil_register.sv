@@ -140,6 +140,7 @@ module phx_axil_register (
         2'b01 : register_1 <= wdata;  // 0x0100
         2'b10  : register_2 <= wdata; // 0x1000
         2'b11  : register_3 <= wdata; // 0x1100
+        default: s_axil_bresp <= 2'b11;
       endcase
     end
   end
@@ -193,6 +194,7 @@ module phx_axil_register (
           2'b01 : s_axil_rdata <= register_1;
           2'b10 : s_axil_rdata <= register_2;
           2'b11 : s_axil_rdata <= register_3;
+          default: s_axil_rresp <= 2'b11;
         endcase
       end 
     end
