@@ -176,7 +176,7 @@ module phx_axil_register (
   end
 
   // R Logic ----------------------------------------------------------
-  // TODO: Change rvalid is required
+  // TODO: Change rvalid if required
   always_ff @(posedge clk) begin : rvalid_block
     if (!rst_n) begin
       s_axil_rvalid <= 1'b0;  
