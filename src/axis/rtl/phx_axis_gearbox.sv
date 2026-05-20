@@ -9,19 +9,14 @@ Module Type : COMMON
 Description :
 
     Parameters -
-      REGISTER_OUTPUT: Registers the multiplexer is require with
-        * High fanout (WIDTH)
-        * Long routing 
-        * High utilization
-      TWO_FF_SYNC: Adds a two flip-flop synchonizer to sw
-        * If sw is a CDC input
-
+      IN_W  : Input Bus Width
+      OUT_W : Output Bus Width
 ------------------------------------------------------------------------------
 */
 
 module phx_axis_gearbox #(
-  parameter IN_W = 256,
-  parameter OUT_W = 512
+  parameter IN_W = 16,
+  parameter OUT_W = 32
 )(
   input logic     clk,
   input logic     rst_n, 
@@ -32,30 +27,69 @@ module phx_axis_gearbox #(
   output logic [OUT_W-1:0]  m_axis_tdata,
   output logic              m_axis_tvalid
 );
- localparam int ACC_W = IN_W + OUT_W; 
 
- logic [ACC_W-1:0] accumulator;
- logic [$clog2(ACC_W):0] fill_level;
+  localparam int BUF_W = IN_W + OUT_W;
+
+  // Find the Greatest Common Divisor (GCD)
+  function automatic int get_gcd (int a, int b);
+    int temp;
+    while (b != 0) begin
+      temp = b; 
+      b = a % b;
+      a = temp;
+    end
+    return a; 
+  endfunction
+
+  localparam int GCD_VAL = get_gcd(IN_W, OUT_W);
+
+  localparam int NUM_STATES = OUT_W / GCD_VAL;
+
+  typedef int state_array_t [NUM_STATES];
+
+  function automatic state_array_t calc_fill_levels ();
+   state_array_t levels;
+   int current = 0;
+   for (int i = 0; i < NUM_STATES; i++) begin
+    levels[i] = current;
+    current = current + IN_W;
+    if (current >= OUT_W) current = current - OUT_W;
+   end
+   return levels;
+  endfunction
+
+  localparam state_array_t FILL_LEVEL = calc_fill_levels();
+
+  // Hardware Locic 
+  logic [BUF_W-1:0] storage_reg;
+  logic [$clog2(NUM_STATES)-1:0] state_idx;
 
   always_ff @(posedge clk) begin
     if(!rst_n)begin
-      fill_level <= '0;
-      accumulator <= '0;
-      m_axis_tvalid <= 0;
-    end else begin
-      m_axis_tvalid <= 0;
-      if (s_axis_tvalid) begin
-        accumulator[(fill_level + IN_W)-1 -: IN_W] <= s_axis_tdata;
-        if ((fill_level + IN_W) >= OUT_W) begin
-          m_axis_tdata <= {s_axis_tdata, accumulator}[OUT_W-1:0];
-          m_axis_tvalid <= 1'b1;
+      state_idx <= '0;
+      storage_reg <= '0;
+      m_axis_tvalid <= 1'b0;
+    end else if (s_axis_tvalid) begin
+      logic [BUF_W-1:0] combined_data;
+      combined_data = storage_reg | (BUF_W'(s_axis_tdata) << FILL_LEVEL[state_idx]);
 
-          fill_level <= (fill_level + IN_W) - OUT_W;
+      if ((FILL_LEVEL[state_idx] + IN_W) >= OUT_W) begin
+        m_axis_tdata <= combined_data[OUT_W-1:0];
+        m_axis_tvalid <= 1;
+        storage_reg <= combined_data >> OUT_W;
+      end else begin
+        m_axis_tvalid <= 0;
+        storage_reg <= combined_data;
+      end
 
-          accumulator <= {s_axis_tdata, accumulator} >> OUT_W;
-        end else begin
-          fill_level <= fill_level + IN_W;
-        end
-      end // if s_axis_tvalid
-    end // if !rst_n
+      if (state_idx == NUM_STATES - 1)
+        state_idx <= 0;
+      else 
+        state_idx <= state_idx + 1;
+
+    end else begin // s_axis_tvalid
+      m_axis_tvalid <= 0;
+    end // !rst_n
   end // always_ff
+
+endmodule

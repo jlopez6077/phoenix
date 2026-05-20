@@ -8,7 +8,6 @@ Module Type : COMMON
 
 Description :
     bypass is a multiplexer that allows dina or dinb to equal dout
-
     Parameters -
       REGISTER_OUTPUT: Registers the multiplexer is require with
         * High fanout (WIDTH)
