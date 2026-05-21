@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------
 # 1. Project Configuration
 # ------------------------------------------------------------------------------
-DUT					?=	phx_axis_gearbox
+DUT					?=	phx_axis_width_converter
 RTL_DIR			?= ../../rtl
 LIB_DIR 		?= ../../lib
 PHX_SRC_DIR ?= $(LIB_DIR)/phoenix/src
@@ -20,7 +20,7 @@ MODULE = test_$(DUT)
 # 2. Module Paramaters
 # ------------------------------------------------------------------------------
 export PARAM_IN_W          	:= 16
-export PARAM_OUT_W          := 64
+export PARAM_OUT_W          := 32
 
 ifeq ($(SIM), icarus)
     COMPILE_ARGS += $(foreach v,$(filter PARAM_%,$(.VARIABLES)),-P $(TOPLEVEL).$(subst PARAM_,,$(v))=$($(v)))
