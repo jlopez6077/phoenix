@@ -123,7 +123,7 @@ module phx_axis_width_converter #(
         if (m_axis_tready)    // If downstream accepted the data
           m_axis_tvalid <= 0; // clear valid unless new data replaces it
 
-        if (s_axis_tready && s_axis_tvalid) begin
+        if (s_axis_tready && s_axis_tvalid) begin // s_axis_tready == (FILL_LEVEL[state_idx] < OUT_W) && !m_axis_tvalid || m_axis_tready;  
           if ((FILL_LEVEL[state_idx] + IN_W) >= OUT_W) begin 
             m_axis_tdata <= combined_data[OUT_W-1:0];
             m_axis_tvalid <= 1'b1;

@@ -19,8 +19,8 @@ MODULE = test_$(DUT)
 # ------------------------------------------------------------------------------
 # 2. Module Paramaters
 # ------------------------------------------------------------------------------
-export PARAM_IN_W          	:= 16
-export PARAM_OUT_W          := 32
+export PARAM_IN_W          	:= 40
+export PARAM_OUT_W          := 16
 
 ifeq ($(SIM), icarus)
     COMPILE_ARGS += $(foreach v,$(filter PARAM_%,$(.VARIABLES)),-P $(TOPLEVEL).$(subst PARAM_,,$(v))=$($(v)))
