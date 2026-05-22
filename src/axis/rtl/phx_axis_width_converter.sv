@@ -27,8 +27,8 @@ Description :
 */
 
 module phx_axis_width_converter #(
-  parameter IN_W = 16,
-  parameter OUT_W = 8
+  parameter IN_W = 32,
+  parameter OUT_W = 32
 )(
   input logic     clk,
   input logic     rst_n, 
@@ -65,14 +65,28 @@ module phx_axis_width_converter #(
   typedef int state_array_t [NUM_STATES];
 
   function automatic state_array_t calc_fill_levels ();
-   state_array_t levels;
-   int current = 0;
-   for (int i = 0; i < NUM_STATES; i++) begin
-    levels[i] = current;
-    current = current + IN_W;
-    if (current >= OUT_W) current = current - OUT_W;
-   end
-   return levels;
+    state_array_t levels;
+    int current;
+    if(IN_W < OUT_W) begin
+      current = 0;
+      for (int i = 0; i < NUM_STATES; i++) begin
+        levels[i] = current;
+        current = current + IN_W;
+        if (current >= OUT_W) 
+          current = current - OUT_W;
+      end
+    end else begin
+      current = IN_W;
+      levels[0] = 0;
+      for (int i = 1; i < NUM_STATES; i++) begin
+      if (current >= OUT_W) 
+        current = current - OUT_W;
+      else
+        current = current + IN_W - OUT_W;
+      levels[i] = current;
+      end
+    end
+    return levels;
   endfunction
 
   localparam state_array_t FILL_LEVEL = calc_fill_levels();
@@ -122,8 +136,7 @@ module phx_axis_width_converter #(
       end else begin
         if (m_axis_tready)    // If downstream accepted the data
           m_axis_tvalid <= 0; // clear valid unless new data replaces it
-
-        if (s_axis_tready && s_axis_tvalid) begin // s_axis_tready == (FILL_LEVEL[state_idx] < OUT_W) && !m_axis_tvalid || m_axis_tready;  
+        if (s_axis_tready && s_axis_tvalid) begin
           if ((FILL_LEVEL[state_idx] + IN_W) >= OUT_W) begin 
             m_axis_tdata <= combined_data[OUT_W-1:0];
             m_axis_tvalid <= 1'b1;

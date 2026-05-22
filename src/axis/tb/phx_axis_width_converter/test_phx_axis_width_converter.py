@@ -30,7 +30,7 @@ async def test_phx_axis_width_converter_loop(dut):
     out_bytes = int(dut.OUT_W.value) // 8
     
     # Define a clean test payload stream (e.g., a simple sequence of bytes)
-    test_bytes = list(range(1, 15)) # 64 bytes of test data
+    test_bytes = list(range(1, 25)) # 64 bytes of test data
     
     # Group raw bytes into IN_W-sized words for the upstream generator
     input_words = []
