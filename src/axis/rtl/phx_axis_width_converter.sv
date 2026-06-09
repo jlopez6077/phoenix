@@ -4,25 +4,30 @@ Module      : phx_axis_width_converter
 Project     : Phoenix Basic Library
 Author      : Juan Lopez
 Created     : 2026-05-19
-Module Type : COMMON
+Module Type : AXI-Stream Component
 
 Description :
-  This module aggregates smaller input 
-  words into a larger output word using a constant-shift accumulation 
-  architecture.
+  A high-performance AXI-Stream width converter that handles both 
+  up-conversion (narrow to wide) and down-conversion (wide to narrow).
+  
+  The module uses a GCD-based pre-calculation to determine exactly 
+  how many bits are in the internal buffer at any given state. This 
+  removes the need for expensive run-time arithmetic (like modulo) 
+  and replaces it with a simple state counter and a lookup table of 
+  constant shift values.
 
   Features :
-  - Automatically calculates state transitions based on the Greatest 
-    Common Divisor (GCD) of the bus widths.
-  - Optimized for high-frequency timing via constant-shift wiring.
+  - Supports any ratio of IN_W to OUT_W.
+  - Constant-shift wiring for high-frequency operation.
+  - Zero-latency combinational bypass when IN_W == OUT_W.
+  - Full AXI-Stream backpressure handling.
 
-  Parameters -
-  - IN_W      : Input Bus Width
-  - OUT_W     : Output Bus Width
-  - Pipelined : 1 = true, Addition register for meeting timing
+  Parameters :
+  - IN_W  : Input data bus width in bits.
+  - OUT_W : Output data bus width in bits.
 
   Latency :
-  - 1 (pipelined accumulation) + PIPELINED (registered shifting) clock cycles
+  - 1 Clock Cycle (Registered output)
 ------------------------------------------------------------------------------
 */
 
@@ -33,21 +38,27 @@ module phx_axis_width_converter #(
   input logic     clk,
   input logic     rst_n, 
 
-  input logic [IN_W-1:0]  s_axis_tdata,
-  input logic             s_axis_tvalid,
-  output logic            s_axis_tready,
+  // Slave Interface (Input)
+  input logic [IN_W-1:0]    s_axis_tdata,
+  input logic               s_axis_tvalid,
+  output logic              s_axis_tready,
 
+  // Master Interface (Output)
   output logic [OUT_W-1:0]  m_axis_tdata,
   output logic              m_axis_tvalid,
   input logic               m_axis_tready
 );
 
+  // Buffer width must be large enough to hold at least one input and one output word
   localparam int BUF_W = IN_W + OUT_W;
+  localparam int STORAGE_W = BUF_W;
+  localparam int COMBO_W = BUF_W;
 
   // ===================================================================================
   // COMPILE-TIME MATH
   // ===================================================================================
-  // Find the Greatest Common Divisor (GCD)
+  
+  // Standard Euclidean algorithm to find the Greatest Common Divisor
   function automatic int get_gcd (int a, int b);
     int temp;
     while (b != 0) begin
@@ -59,15 +70,19 @@ module phx_axis_width_converter #(
   endfunction
 
   localparam int GCD_VAL = get_gcd(IN_W, OUT_W);
+  
+  // The state machine repeats every (TotalBits / GCD) cycles
   localparam int NUM_STATES = (IN_W > OUT_W) ? (IN_W / GCD_VAL): OUT_W / GCD_VAL;
 
-  // Pre-caluculate the fill_level for each state
   typedef int state_array_t [NUM_STATES];
 
+  // This function calculates exactly how many valid bits are in the 'storage_reg' 
+  // for every possible step of the conversion process.
   function automatic state_array_t calc_fill_levels ();
     state_array_t levels;
     int current;
     if(IN_W < OUT_W) begin
+      // Up-conversion: Buffer grows by IN_W each step until it reaches OUT_W
       current = 0;
       for (int i = 0; i < NUM_STATES; i++) begin
         levels[i] = current;
@@ -76,41 +91,46 @@ module phx_axis_width_converter #(
           current = current - OUT_W;
       end
     end else begin
+      // Down-conversion: Buffer starts full and shrinks by OUT_W each step
       current = IN_W;
       levels[0] = 0;
       for (int i = 1; i < NUM_STATES; i++) begin
-      if (current >= OUT_W) 
-        current = current - OUT_W;
-      else
-        current = current + IN_W - OUT_W;
-      levels[i] = current;
+        if (current >= OUT_W) 
+          current = current - OUT_W;
+        else
+          current = current + IN_W - OUT_W;
+        levels[i] = current;
       end
     end
     return levels;
   endfunction
 
+  // The FILL_LEVEL array is used as a Constant Lookup Table for the shifter hardware
   localparam state_array_t FILL_LEVEL = calc_fill_levels();
-  
+
   // ===================================================================================
   // HARDWARE LOGIC
   // ===================================================================================
-  if (IN_W == OUT_W) begin
+  
+  if (IN_W == OUT_W) begin // Passthrough logic
     assign m_axis_tdata = s_axis_tdata;
     assign m_axis_tvalid = s_axis_tvalid;
     assign s_axis_tready = m_axis_tready;
   end else begin
     
-    logic [BUF_W-1:0] storage_reg;
+    logic [STORAGE_W-1:0] storage_reg;     // Internal accumulation buffer
     logic [$clog2(NUM_STATES)-1:0] state_idx;
     logic [$clog2(NUM_STATES)-1:0] next_state_idx;
-    logic [BUF_W-1:0] combined_data;
+    logic [COMBO_W-1:0] combined_data;   // storage_reg + new input data
 
-    // Output is ready if it's empty OR downstream is consuming it right now
     logic out_ready;
-    assign out_ready = !m_axis_tvalid || m_axis_tready;
+    assign out_ready = !m_axis_tvalid || m_axis_tready; // Ready if register is empty OR downstream is consuming
+
+    // Backpressure: Module ready for input if buffer has space or outputting data
     assign s_axis_tready = (IN_W > OUT_W) ? (FILL_LEVEL[state_idx] < OUT_W) && out_ready 
                                           : out_ready;
 
+    // Sequential State Update
     always_ff @(posedge clk) begin : state_block
       if (!rst_n) begin
         state_idx <= '0;
@@ -119,31 +139,40 @@ module phx_axis_width_converter #(
       end
     end
 
+    // Combinational Next State Logic
     always_comb begin : next_state_block
       next_state_idx = state_idx;
-      if(s_axis_tready && s_axis_tvalid) begin
+      // CASE 1: Slave data arrives and Master is ready to consume
+      if(s_axis_tready && s_axis_tvalid) begin 
         next_state_idx = (state_idx == NUM_STATES-1) ? '0 : state_idx + 1'b1;
-      end else if ((FILL_LEVEL[state_idx] >= OUT_W) && m_axis_tready) begin
+      // CASE 2: No new data, but buffer has enough data to send (Down-conversion)
+      end else if ((FILL_LEVEL[state_idx] >= OUT_W) && m_axis_tready) begin 
         next_state_idx = (state_idx == NUM_STATES-1) ? '0 : state_idx + 1'b1;
       end
-    end // next_state_block
+    end
 
+    // Main Data Path
     always_ff @(posedge clk) begin 
       if(!rst_n)begin
         storage_reg <= '0;
         m_axis_tvalid <= 1'b0;
         m_axis_tdata <= '0;
       end else begin
-        if (m_axis_tready)    // If downstream accepted the data
-          m_axis_tvalid <= 0; // clear valid unless new data replaces it
+        if (m_axis_tready)
+          m_axis_tvalid <= 0; 
+
+        // CASE 1: Slave data arrives and Master is ready to consume
         if (s_axis_tready && s_axis_tvalid) begin
+          // If the new data completes an output width
           if ((FILL_LEVEL[state_idx] + IN_W) >= OUT_W) begin 
             m_axis_tdata <= combined_data[OUT_W-1:0];
             m_axis_tvalid <= 1'b1;
-            storage_reg <= combined_data >> OUT_W;
+            storage_reg <= combined_data >> OUT_W; // Store the "overflow" bits
           end else begin
-            storage_reg <= combined_data;
+            storage_reg <= combined_data; // Not enough bits for an output
           end
+        
+        // CASE 2: No new data, but buffer has enough data to send (Down-conversion)
         end else if(FILL_LEVEL[state_idx] >= OUT_W) begin
           if (out_ready) begin
             m_axis_tdata <= combined_data[OUT_W-1:0];
@@ -152,15 +181,16 @@ module phx_axis_width_converter #(
           end
         end
       end
-    end // always_ff
+    end
 
+    // Accumulation logic: New data is shifted to the next "empty" slot in the buffer
     always_comb begin : combined_data_block
       if(s_axis_tready && s_axis_tvalid) 
-        combined_data = storage_reg | (BUF_W'(s_axis_tdata) << FILL_LEVEL[state_idx]);
+        combined_data = storage_reg | (COMBO_W'(s_axis_tdata) << FILL_LEVEL[state_idx]);
       else 
         combined_data = storage_reg;
-    end // combined_data_block
+    end
 
-  end // if IN_W == OUT_W
+  end
 
 endmodule
