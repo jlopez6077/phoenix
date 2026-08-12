@@ -1,9 +1,22 @@
+/*
+------------------------------------------------------------------------------
+Module      : phx_apb_if
+Project     : Phoenix Basic Library
+Author      : Juan Lopez
+Created     : 2026-04-28
+Module Type : APB
+
+Description :
+    APB interface
+
+------------------------------------------------------------------------------
+*/
 
 interface phx_apb_if #(
   parameter DATA_W = 32,
   parameter ADDR_W = 32
 )();
-
+  
   logic [ADDR_W-1:0]  paddr;
   logic               psel;
   logic               penable;
@@ -12,7 +25,7 @@ interface phx_apb_if #(
   logic [DATA_W-1:0]  prdata;
   logic               pready;
 
-  modport mst (
+  modport master (
     output paddr,
     output psel,
     output penable,
@@ -33,7 +46,7 @@ interface phx_apb_if #(
   //assign m_apb.pwrite = m_apb_pwrite
   //assign m_apb.pwdata = m_apb_pwdata
 
-  modport slv (
+  modport slave (
     input paddr,
     input psel,
     input penable,
@@ -43,7 +56,7 @@ interface phx_apb_if #(
     output pready
   );
 
-  modport mon (
+  modport monitor (
     input paddr,
     input psel,
     input penable,

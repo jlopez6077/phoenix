@@ -1,6 +1,10 @@
 # --- Cocotb --- 
 cocotb
+cocotb-test
 cocotbext-axi
 cocotbext-eth
 cocotbext-uart
 cocotbext-pcie
+
+# --- Additional --- 
+pytest

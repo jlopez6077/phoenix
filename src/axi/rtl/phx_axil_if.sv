@@ -46,38 +46,38 @@ interface phx_axil_if #(
   logic               rvalid;
   logic               rready;
   
-  // --- Modports ---
-  modport wr_mst (
-          // AW
-          output awaddr,
-          output awprot,
-          output awvalid,
-          input  awready,
-          // W
-          output wdata,
-          output wstrb,
-          output wvalid,
-          input  wready,
-          // B
-          input  bresp,
-          input  bvalid,
-          output bready
-      );
+ // // --- Modports ---
+ // modport wr_mst (
+ //         // AW
+ //         output awaddr,
+ //         output awprot,
+ //         output awvalid,
+ //         input  awready,
+ //         // W
+ //         output wdata,
+ //         output wstrb,
+ //         output wvalid,
+ //         input  wready,
+ //         // B
+ //         input  bresp,
+ //         input  bvalid,
+ //         output bready
+ //     );
 
-    modport rd_mst (
-        // AR
-        output araddr,
-        output arprot,
-        output arvalid,
-        input  arready,
-        // R
-        input  rdata,
-        input  rresp,
-        input  rvalid,
-        output rready
-    );
+ //   modport rd_mst (
+ //       // AR
+ //       output araddr,
+ //       output arprot,
+ //       output arvalid,
+ //       input  arready,
+ //       // R
+ //       input  rdata,
+ //       input  rresp,
+ //       input  rvalid,
+ //       output rready
+ //   );
 
-    modport wr_slv (
+    modport wr_slave (
         // AW
         input  awaddr,
         input  awprot,
@@ -103,7 +103,7 @@ interface phx_axil_if #(
     //assign s_axil_wr.bresp    = s_axil_bresp;
     //assign s_axil_wr.bvalid   = s_axil_bvalid;
 
-    modport rd_slv (
+    modport rd_slave (
         // AR
         input  araddr,
         input  arprot,
