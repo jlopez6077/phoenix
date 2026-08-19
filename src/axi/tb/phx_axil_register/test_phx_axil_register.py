@@ -13,19 +13,19 @@ async def axil_write(dut, address, value):
     
     # Wait for the Address and Data handshakes
     while not (dut.s_axil_awready.value and dut.s_axil_wready.value):
-        await RisingEdge(dut.clk)
+        await RisingEdge(dut.axil_clk)
         await Timer(10, unit="ps")
     
-    await RisingEdge(dut.clk)
+    await RisingEdge(dut.axil_clk)
     dut.s_axil_awvalid.value = 0
     dut.s_axil_wvalid.value = 0
 
     # Wait for the Write Response (B channel)
     while not dut.s_axil_bvalid.value:
-        await RisingEdge(dut.clk)
+        await RisingEdge(dut.axil_clk)
     assert dut.s_axil_bresp.value == 0x00, f"Error: bresp {hex(dut.s_axil_bresp.value)}, expected 0x00"
     dut.s_axil_bready.value = 0
-    #await RisingEdge(dut.clk)
+    #await RisingEdge(dut.axil_clk)
 
 async def axil_read(dut, address):
     """Helper to perform an AXI-Lite Read using flattened top-level signals"""
@@ -35,19 +35,19 @@ async def axil_read(dut, address):
     
     # Wait for the Address handshake
     while not dut.s_axil_arready.value:
-        await RisingEdge(dut.clk)
+        await RisingEdge(dut.axil_clk)
         await Timer(10, unit="ps")
     
-    await RisingEdge(dut.clk)
+    await RisingEdge(dut.axil_clk)
     dut.s_axil_arvalid.value = 0
     
     # Wait for the Data handshake (R channel)
     while not dut.s_axil_rvalid.value:
-        await RisingEdge(dut.clk)
+        await RisingEdge(dut.axil_clk)
     dut.s_axil_rready.value = 0
     
     data = dut.s_axil_rdata.value
-    #await RisingEdge(dut.clk)
+    #await RisingEdge(dut.axil_clk)
     return data
 
 # --- MAIN TEST ---
@@ -56,7 +56,7 @@ async def test_phx_axil_register_basic(dut):
     """Test Register Read/Write AXI4-Lite Commands on phx_axil_register_top"""
     
     # Start clock
-    clock = Clock(dut.clk, 10, unit="ns")
+    clock = Clock(dut.axil_clk, 10, unit="ns")
     cocotb.start_soon(clock.start())
 
     # Reset sequence

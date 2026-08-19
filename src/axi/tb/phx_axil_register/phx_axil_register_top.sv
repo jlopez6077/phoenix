@@ -1,5 +1,5 @@
 module phx_axil_register_top (
-  input logic clk,
+  input logic axil_clk,
   input logic rst_n,
 
   // Manually break out the AXI-Lite Write Channel
@@ -47,10 +47,10 @@ module phx_axil_register_top (
 
   // 3. Instantiate your Register Module
   phx_axil_register u_dut (
-    .clk(clk),
+    .axil_clk(axil_clk),
     .rst_n(rst_n),
-    .s_axil_wr(axil_if.wr_slv),
-    .s_axil_rd(axil_if.rd_slv)
+    .s_axil_wr(axil_if.wr_slave),
+    .s_axil_rd(axil_if.rd_slave)
   );
 
 endmodule
